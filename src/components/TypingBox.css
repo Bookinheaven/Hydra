@@ -1,0 +1,67 @@
+:root {
+    --cursor-color : rgba(255, 0, 0, 0.856);
+    --cursor-border-radius : 0.5rem;
+    --cursor-height : 1.2em;
+}
+
+
+#typing-container {
+    width: 100%;
+    height: 50%;
+    
+}
+
+#words-container {
+    position: relative;
+    margin: 0 auto;
+}
+
+#t-cursor {
+    width: 2px;
+    font-size: 2rem;
+    display: block;
+    opacity: 1;
+}
+
+#t-cursor.default {
+    height: var(--cursor-height);
+    background: var(--cursor-color);
+    animation: t-cursor-smooth-blink 1s infinite;
+    position: absolute;
+    border-radius: var(--cursor-border-radius);
+    transform-origin: top left;
+}
+
+.word {
+    display: inline;
+    padding: 0.5em;
+    font-size: 1em;
+    line-height: 1em;
+    font-weight: 400;
+}
+#wordsInput {
+    width: 1ch;
+    font-size: 1em;
+    height: 100%;
+    opacity: 0;
+    padding: 0;
+    margin: 0 auto;
+    border: none;
+    outline: none;
+    display: block;
+    resize: none;
+    position: absolute;
+    z-index: -1;
+    cursor: default;
+    pointer-events: none;
+    border-radius: 0;
+}
+
+@keyframes t-cursor-smooth-blink {
+    100% {
+        opacity: 1;
+    }
+    0% {
+        opacity: 0;
+    }
+}
