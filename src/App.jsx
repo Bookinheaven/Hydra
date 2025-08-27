@@ -6,8 +6,12 @@ function App() {
 
   return (
     <>
-      <div id='header-frame' className='p-6 '>
+      <div id='header-frame' className=''>
         <h1>Hydra</h1>
+      </div>
+      {/* Need to add access bar here */}
+      <div id="tempspace">
+
       </div>
       <TypingBox></TypingBox>
     </>

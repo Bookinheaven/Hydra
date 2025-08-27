@@ -1,19 +1,52 @@
 :root {
     --cursor-color : rgba(255, 0, 0, 0.856);
     --cursor-border-radius : 0.5rem;
-    --cursor-height : 1.2em;
+    --cursor-height : 1.1em;
+    --default-color: grey;
+    --correct-color: white;
+    --wrong-color: #ef4444;
 }
 
 
 #typing-container {
     width: 100%;
     height: 50%;
-    
+    display: flex;
+}
+
+.OnFocusOffWarn {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backdrop-filter: blur(3px);
+    background-color: rgba(56, 56, 56, 0.158);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.OnFocusOffWarn p {
+    text-align: center;
+    height: 100%;
+    align-content: center;
+    font-size: 1rem;
+    z-index: 999;
+    position: absolute;
+    width: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    pointer-events: none;
 }
 
 #words-container {
+    width: 75%;
+    height: 70%;
     position: relative;
     margin: 0 auto;
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
 }
 
 #t-cursor {
@@ -21,6 +54,7 @@
     font-size: 2rem;
     display: block;
     opacity: 1;
+    top: 0;
 }
 
 #t-cursor.default {
@@ -29,20 +63,46 @@
     animation: t-cursor-smooth-blink 1s infinite;
     position: absolute;
     border-radius: var(--cursor-border-radius);
-    transform-origin: top left;
+}
+
+#words {
+    height: fit-content;
+    height: -moz-fit-content;
+    padding-bottom: .5em;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    align-content: flex-start;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 .word {
     display: inline;
-    padding: 0.5em;
-    font-size: 1em;
+    margin: 0.25em 0em;
+    font-size: 1.8em;
     line-height: 1em;
     font-weight: 400;
+    color: var(--default-color);
+    border-bottom: 2px transparent;
 }
+
+/* #words span.active {outline: 1px solid currentColor;}  */
+
+.correct {
+  color: var(--correct-color);
+}
+
+.incorrect {
+  color: var(--wrong-color);
+  text-decoration: underline;
+}
+
 #wordsInput {
-    width: 1ch;
+    /* width: 1ch; */
     font-size: 1em;
-    height: 100%;
+    /* height: 100%; */
     opacity: 0;
     padding: 0;
     margin: 0 auto;
@@ -55,6 +115,10 @@
     cursor: default;
     pointer-events: none;
     border-radius: 0;
+}
+
+.hidden {
+    display: none !important;
 }
 
 @keyframes t-cursor-smooth-blink {

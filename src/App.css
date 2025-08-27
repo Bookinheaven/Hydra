@@ -1,7 +1,20 @@
 
 #root {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     box-sizing: border-box;
     font-family: "Vazirmatn", monospace;
+    /* overflow-x: hidden; */
+    margin: 0;
+    padding: 0;
+}
+
+#header-frame h1{
+    user-select: none;
+    margin: 1rem;
+    margin-left: 10rem;
+}
+
+#tempspace {
+    height: 25%;
 }
