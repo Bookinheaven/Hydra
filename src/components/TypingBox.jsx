@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import "./TypingBox.css";
 
 const sampleTexts = [
-    "The Industrial Revolution marked a pivotal period of profound technological and socioeconomic transformation that began in Great Britain, completely reshaping societies by shifting them from agrarian economies to industrial powerhouses.",
-    "Artificial intelligence is rapidly evolving, with large language models demonstrating remarkable capabilities in understanding and generating human-like text, which has profound implications for the future of communication and problem-solving.",
-    "Beneath the vast canopy of the ancient, whispering forest, a hidden stream trickled over smooth, moss-covered stones, its gentle melody a secret language known only to the nocturnal creatures and the silent moon.",
-    "Exploring the deep ocean reveals a breathtakingly diverse ecosystem of bioluminescent creatures and hydrothermal vents, a mysterious and largely uncharted frontier that continues to challenge our understanding of life on Earth and its incredible adaptability to extreme environments."
+    "The Industrial Revolution changed societies in Great Britain.",
+    "AI is rapidly evolving and impacting communication.",
+    "A hidden stream flows quietly under the moonlight.",
+    "The deep ocean holds a mysterious, diverse ecosystem."
 ];
 
 export default function TypingBox() {
@@ -20,6 +20,11 @@ export default function TypingBox() {
     const [wrongLetters, setWrongLetters] = useState({});
     const [correctWords, setCorrectWords] = useState({});
     const [wrongWords, setWrongWords] = useState({});
+    const [correctNoWords, setCorrectNoWords] = useState(0)
+    const [time, setTime] = useState(0);
+    const [isRunning, setIsRunning] = useState(false);
+    const [finished, setFinished] = useState(false);
+    const [showResults, setShowResults] = useState(false);
 
     const inputRef = useRef(null);
     const cursorRef = useRef(null);
@@ -27,6 +32,9 @@ export default function TypingBox() {
     const blurTimeoutRef = useRef(null);
     const countedLetters = useRef(new Set());
     const countedWords = useRef(new Set());
+
+    const stopTimer = useCallback(() => setIsRunning(false), []);
+    const resetTimer = useCallback(() => setTime(0), []);
 
     const updateStat = useCallback((setState, key) => {
         setState(prevStats => ({
@@ -54,6 +62,11 @@ export default function TypingBox() {
         setLetterIndex(0);
         setLockedIndex(0);
         setInput("");
+        setCorrectNoWords(0);
+        setFinished(false);
+        setShowResults(false);
+        stopTimer();
+        resetTimer();
         countedLetters.current.clear();
         countedWords.current.clear();
         wordRefs.current.forEach(wordNode => {
@@ -61,7 +74,7 @@ export default function TypingBox() {
                 letterNode.classList.remove("correct", "incorrect", "skipped");
             });
         });
-    }, []);
+    }, [stopTimer, resetTimer]);
 
     const generateNewText = useCallback(() => {
         let newText;
@@ -73,109 +86,124 @@ export default function TypingBox() {
     }, [text, resetTyping]);
 
     useEffect(() => {
+        wordRefs.current.forEach((el, i) => {
+            el?.classList.toggle("active", i === wordIndex);
+        });
+    }, [wordIndex]);
+    
+    useEffect(() => {
         if (!text) return;
-
-        wordRefs.current.forEach((el, i) => el?.classList.toggle("active", i === wordIndex));
-
         const sourceWords = text.split(" ");
         const typedWords = input.split(" ");
-        
-        const validateCurrentLetter = () => {
-            const currentWordIndex = Math.max(0, typedWords.length - 1);
-            const typedWord = typedWords[currentWordIndex] || "";
-            setWordIndex(currentWordIndex);
-            setLetterIndex(typedWord.length);
 
-            const wordNode = wordRefs.current[currentWordIndex];
-            if (!wordNode) return;
-
-            const currentLetterIndex = typedWord.length - 1;
-            const letterNode = wordNode.children[currentLetterIndex];
-            if (!letterNode) return;
-
-            const sourceChar = sourceWords[currentWordIndex]?.[currentLetterIndex];
-            const typedChar = typedWord[currentLetterIndex];
-
-            if (typedChar === sourceChar) {
-                letterNode.classList.add("correct");
-                letterNode.classList.remove("incorrect", "skipped");
-                addLettersUserList(typedChar, "c");
-            } else {
-                letterNode.classList.add("incorrect");
-                letterNode.classList.remove("correct", "skipped");
-                addLettersUserList(sourceChar, "w");
+        let totalCorrectWords = 0;
+        for (let w_idx = 0; w_idx < typedWords.length - 1; w_idx++) {
+            if (typedWords[w_idx] === sourceWords[w_idx]) {
+                totalCorrectWords++;
             }
-        };
+        }
+        setCorrectNoWords(totalCorrectWords);
 
-        const validateCompletedWord = () => {
-            const wordJustTypedIndex = typedWords.length - 2;
-            if (wordJustTypedIndex < 0) return;
-
-            const sourceWord = sourceWords[wordJustTypedIndex] || "";
-            const typedWord = typedWords[wordJustTypedIndex] || "";
-            const wordNode = wordRefs.current[wordJustTypedIndex];
+        sourceWords.forEach((sourceWord, w_idx) => {
+            const wordNode = wordRefs.current[w_idx];
             if (!wordNode) return;
-
-            for (let i = 0; i < sourceWord.length; i++) {
-                const letterNode = wordNode.children[i];
+            const typedWord = typedWords[w_idx];
+            for (let l_idx = 0; l_idx < sourceWord.length; l_idx++) {
+                const letterNode = wordNode.children[l_idx];
                 if (!letterNode) continue;
-
-                const typedChar = typedWord[i];
+                letterNode.classList.remove("correct", "incorrect", "skipped");
+                const typedChar = typedWord ? typedWord[l_idx] : undefined;
                 if (typedChar === undefined) {
-                    letterNode.classList.add("skipped");
-                    letterNode.classList.remove("correct", "incorrect");
-                    addLettersUserList(sourceWord[i], "w");
-                } else if (typedChar === sourceWord[i]) {
+                    if (w_idx < typedWords.length - 1) {
+                        letterNode.classList.add("skipped");
+                    }
+                } else if (typedChar === sourceWords[w_idx][l_idx]) {
                     letterNode.classList.add("correct");
-                    letterNode.classList.remove("incorrect", "skipped");
+                } else {
+                    letterNode.classList.add("incorrect");
                 }
             }
+        });
+        
+        const currentWordIndex = Math.max(0, typedWords.length - 1);
+        const currentTypedWord = typedWords[currentWordIndex] || "";
+        setWordIndex(currentWordIndex);
+        setLetterIndex(currentTypedWord.length);
 
+        if (input.endsWith(" ")) {
+            const lastWordIndex = typedWords.length - 2;
+            if (lastWordIndex < 0) return;
+
+            const sourceWord = sourceWords[lastWordIndex];
+            const typedWord = typedWords[lastWordIndex] || "";
+
+            for (let i = 0; i < sourceWord.length; i++) {
+                const sourceChar = sourceWord[i];
+                const typedChar = typedWord[i];
+
+                if (typedChar === undefined) {
+                    // addLettersUserList(sourceChar, 'w');
+                } else if (typedChar === sourceChar) {
+                    addLettersUserList(sourceChar, 'c'); 
+                } else {
+                    addLettersUserList(sourceChar, 'w'); 
+                }
+            }
             if (typedWord === sourceWord) {
                 setLockedIndex(input.length);
                 addWordsUserList(sourceWord, "c");
             } else {
                 addWordsUserList(sourceWord, "w");
             }
-
-            setWordIndex(wordJustTypedIndex + 1);
-            setLetterIndex(0);
-        };
-
-        if (input.endsWith(" ")) {
-            validateCompletedWord();
-        } else if (input.length > 0) {
-            validateCurrentLetter();
-        } else {
+        }
+        
+        if (input.length === 0) {
             resetTyping();
         }
-
-    }, [input, text, wordIndex, addLettersUserList, addWordsUserList, resetTyping]);
-
+    }, [input, text, resetTyping, addWordsUserList, addLettersUserList]);
+    
     useEffect(() => {
         const cursorNode = cursorRef.current;
         const activeWordNode = wordRefs.current[wordIndex];
         if (!cursorNode || !activeWordNode) return;
-
         const letters = activeWordNode.children;
         const targetLetter = letters[letterIndex];
         let newLeft;
-
         if (targetLetter) {
             newLeft = targetLetter.getBoundingClientRect().left;
         } else if (letters.length > 0) {
             const lastLetter = letters[letters.length - 1];
             newLeft = lastLetter.getBoundingClientRect().right;
-        } else {
-            return;
-        }
-
+        } else { return; }
         const containerLeft = cursorNode.parentElement.getBoundingClientRect().left;
-        cursorNode.style.top = `${activeWordNode.getBoundingClientRect().top - cursorNode.parentElement.getBoundingClientRect().top}px`;
+        cursorNode.style.top = `${activeWordNode.getBoundingClientRect().top - cursorNode.parentElement.getBoundingClientRect().top -6}px`;
         cursorNode.style.left = `${newLeft - containerLeft}px`;
+    }, [letterIndex, wordIndex, text]);
 
-    }, [letterIndex, wordIndex, input]);
+    useEffect(() => {
+        generateNewText();
+    }, []);
+
+    useEffect(() => {
+        let interval;
+        if (isRunning) {
+            interval = setInterval(() => {
+                setTime(prev => prev + 0.1);
+            }, 100);
+        } else {
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [isRunning]);
     
+    useEffect(() => {
+        if (!finished && input === text && text.length > 0) {
+            stopTimer();
+            setFinished(true);
+            setShowResults(true);
+        }
+    }, [input, text, finished, stopTimer]);
+
     useEffect(() => {
         const savedData = JSON.parse(localStorage.getItem('typingStats_temp') || '{}');
         setCorrectLetters(savedData.correctLetters || {});
@@ -191,51 +219,87 @@ export default function TypingBox() {
         }
     }, [correctLetters, wrongLetters, correctWords, wrongWords]);
     
-    useEffect(() => {
-        generateNewText();
-    }, []);
-
-
+    const startTimer = () => setIsRunning(true);
+    
     const handleChange = (e) => {
         const value = e.target.value;
+        const sourceWords = text.split(' ');
+        const typedWords = input.split(' ');
+        
+        if (!finished && typedWords.length === sourceWords.length && value === input + " ") {
+            stopTimer();
+            setFinished(true);
+            setShowResults(true);
+            cursorRef.current?.classList.add("hidden");
+            setInput(input.trim());
+            return;
+        }
+
+        if (input.length === 0 && value === " ") return;
+        if (input.endsWith(" ") && value === input + " ") return;
+
+        if (!isRunning && value.length > 0 && !finished) startTimer();
         if (value.length < lockedIndex) return;
+
+        const currentWordIndex = input.split(' ').length - 1;
+        const currentWord = sourceWords[currentWordIndex];
+        const typedCharsInWord = value.split(' ').pop();
+        if (currentWord && typedCharsInWord.length > currentWord.length && !value.endsWith(' ')) return;
+        
         setInput(value);
     };
-    const handleKeyDown = (e) => {
-      if (e.key === 'Tab') {
-        // focusInput()
-        pass 
-      } 
-      // const typingKeys = /^[a-zA-Z0-9 `~!@#$%^&*()_+\-=[\]{}|;:'",.<>/?\\]$/;
 
-      // if (typingKeys.test(e.key) || e.key === "Backspace" || e.key === "Tab") {
-      //     setIsTyping(true);
-      // } else {
-      //     setIsTyping(false);
-      // }
+    const handleKeyDown = (e) => {
+        const typingKeys = /^[a-zA-Z0-9 `~!@#$%^&*()_+\-=[\]{}|;:'",.<>/?\\]$/;
+        if (isTyping && e.key === "CapsLock") return
+        if (typingKeys.test(e.key) || e.key === "Backspace" || e.key === "Tab") {
+            setIsTyping(true);
+        } else {
+            setIsTyping(false);
+        }
     }
+
+    const calculateWPM = () => {
+        const minutes = time / 60;
+        if (minutes === 0 || input.length === 0) return 0;
+        const wpm = (input.length / 5) / minutes;
+        return wpm.toFixed(1);
+    };
+
+    const calculateAccuracy = () => {
+        if (input.length === 0) return 100;
+        let errors = 0;
+        for (let i = 0; i < input.length; i++) {
+            if (input[i] !== text[i]) {
+                errors++;
+            }
+        }
+        const accuracy = ((input.length - errors) / input.length) * 100;
+        return accuracy > 0 ? accuracy.toFixed(1) : 0;
+    };
+
     const handleNewText = () => {
         generateNewText();
         inputRef.current?.focus();
     };
 
+    const handleRestartText = () => {
+        resetTyping();
+        inputRef.current?.focus();
+    };
+
     const focusInput = () => {
         if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
-        inputRef.current?.focus();
+        if (!finished) {
+           inputRef.current?.focus();
+        }
         cursorRef.current?.classList.remove("hidden");
         setOnFocus(true);
     };
-    const directBlur = () => {
-      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
-      blurTimeoutRef.current = setTimeout(() => {
-            setOnFocus(false);
-            cursorRef.current?.classList.add("hidden");
-        }, 2000);
-    }
 
     const handleBlur = () => {
         cursorRef.current?.classList.add("hidden");
-        // setIsTyping(false)
+        setIsTyping(false)
         if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
         blurTimeoutRef.current = setTimeout(() => {
             setOnFocus(false);
@@ -259,42 +323,66 @@ export default function TypingBox() {
     };
 
     return (
-      <div id="typing-zone">
-        <div id="top-bar"></div>
-        <div id="middle-zone">
-
-        </div>
-        <div id="typing-container" onClick={focusInput}>
-            <input
-                id="wordsInput"
-                ref={inputRef}
-                type="text"
-                autoComplete="off"
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck="false"
-                autoFocus
-                value={input}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-            />
-            <div id="words-container" >
-                {!onFocus && (
-                    <div className="OnFocusOffWarn">
-                        Click here or press any key to focus
-                    </div>
-                )}
-                <div id="t-cursor" className="default" ref={cursorRef}></div>
-                <div id="words" className={!onFocus ? "blurred" : ""}>{renderText(text)}</div>
+        <div id="typing-zone">
+            <div id="top-bar"></div>
+            <div id="middle-zone"></div>
+            <div id="typing-container" onClick={focusInput}>
+                <div id="score-preview">
+                    {isTyping && !finished && (
+                    <span>
+                        {correctNoWords}/{text.split(" ").length}
+                    </span>)}
+                </div>
+                <input
+                    id="wordsInput"
+                    ref={inputRef}
+                    type="text"
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    autoFocus
+                    value={input}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    onKeyDown={handleKeyDown}
+                    onPaste={(e) => e.preventDefault()}
+                    disabled={finished}
+                />
+                <div id="words-container" >
+                    {showResults && (
+                        <div className="results-overlay">
+                            <div className="results-content">
+                            <h2>Results</h2>
+                            <p>WPM: {calculateWPM()}</p>
+                            <p>Accuracy: {calculateAccuracy()}%</p>
+                            <p>Words Correct: {correctNoWords}/{text.split(" ").length}</p>
+                            <button onClick={handleRestartText}>Retry</button>
+                            <button onClick={handleNewText}>Next Text</button>
+                            </div>
+                        </div>
+                    )}
+                    {!onFocus && !finished && (
+                        <div className="OnFocusOffWarn">
+                            Click here or press any key to focus
+                        </div>
+                    )}
+                    <div id="t-cursor" className="default" ref={cursorRef}></div>
+                    <div id="words" className={!onFocus ? "blurred" : ""}>{renderText(text)}</div>
+                </div>
+                <div id="game-bars">
+                    <button id="restart-button" onClick={handleRestartText}>
+                      <svg width="2.5em" fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M19.146 4.854l-1.489 1.489A8 8 0 1 0 12 20a8.094 8.094 0 0 0 7.371-4.886 1 1 0 1 0-1.842-.779A6.071 6.071 0 0 1 12 18a6 6 0 1 1 4.243-10.243l-1.39 1.39a.5.5 0 0 0 .354.854H19.5A.5.5 0 0 0 20 9.5V5.207a.5.5 0 0 0-.854-.353z"></path> </g></svg>
+                    </button>
+                    <button id="next-button" onClick={handleNewText}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="2.5em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" ><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </div>
             </div>
-            <button id="restart-button" onClick={handleNewText}>
-              <svg width="2.5em" fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M19.146 4.854l-1.489 1.489A8 8 0 1 0 12 20a8.094 8.094 0 0 0 7.371-4.886 1 1 0 1 0-1.842-.779A6.071 6.071 0 0 1 12 18a6 6 0 1 1 4.243-10.243l-1.39 1.39a.5.5 0 0 0 .354.854H19.5A.5.5 0 0 0 20 9.5V5.207a.5.5 0 0 0-.854-.353z"></path> </g></svg>
-            </button>
+            <div id="sub-zone">
+                <div id="speed-ac">WPM: {calculateWPM()} | ACC: {calculateAccuracy()}%</div>
+               
+            </div>
         </div>
-        <div id="footer-zone">
-
-        </div>
-      </div>
     );
 }

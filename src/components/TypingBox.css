@@ -20,10 +20,44 @@ body {
 }
 #typing-container {
     width: 100%;
-    height: 50%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* position: relative; */
+}
+
+#score-preview {
+    width: 75%;
+    color: var(--main-color);
+    font-size: 2em;
+}
+
+.results-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20; 
+  border-radius: 10px;
+}
+
+.results-content {
+    /* position: absolute; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(155, 155, 155);
+    width: 100%;
+    height: 10%;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 20; 
 }
 
 .OnFocusOffWarn {
@@ -48,7 +82,7 @@ body {
 
 #words-container {
     width: 75%;
-    height: max-content;
+    height: 35%;
     position: relative;
     margin: 0 auto;
 }
@@ -134,14 +168,14 @@ body {
     display: none !important;
 }
 
-#restart-button {
+#game-bars button {
     width: fit-content;
     background-color: transparent;
 }
-#restart-button:hover {
+#game-bars button:hover {
     border-color: var(--button-hover-color);
 }
-#restart-button:focus {
+#game-bars button:focus {
   outline: 2px solid #fff; 
 }
 @keyframes t-cursor-smooth-blink {
@@ -152,3 +186,14 @@ body {
         opacity: 0;
     }
 }
+
+#sub-zone {
+    position: fixed;
+    bottom:  0;
+    right: 0;
+    margin: 1rem;
+    background-color: var(--sub-alt-color);
+    padding: 1rem;
+    border-radius: var(--cursor-border-radius);
+    display: flex;
+} 

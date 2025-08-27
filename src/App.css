@@ -7,6 +7,8 @@
     /* overflow-x: hidden; */
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 #header-frame h1{
@@ -17,4 +19,9 @@
 
 #tempspace {
     height: 25%;
+}
+
+#typing-zone {
+    width: 100%;
+    height: 100%;
 }
