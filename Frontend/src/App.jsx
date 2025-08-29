@@ -14,8 +14,8 @@ function App() {
       <div id="tempspace">
 
       </div>
-      {/* <TypingBox></TypingBox> */}
-      <DTypingBox></DTypingBox>
+      <TypingBox></TypingBox>
+      {/* <DTypingBox></DTypingBox> */}
     </>
   )
 }
