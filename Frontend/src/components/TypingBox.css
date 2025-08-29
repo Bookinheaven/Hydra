@@ -97,6 +97,7 @@ body {
     display: block;
     opacity: 1;
     top: 0;
+    left: 0.2em;
 }
 
 #t-cursor.default {
@@ -126,7 +127,7 @@ body {
 }
 .word {
     display: inline;
-    margin: 0.25em 0em;
+    margin: 0.25em 0.3em;
     font-size: 1.8em;
     color: var(--text-color);
     line-height: 1em;
@@ -136,7 +137,7 @@ body {
 }
 
 .skipped {
-    border-bottom: 2px solid var(--wrong-color);
+    /* border-bottom: 2px solid var(--wrong-color); */
     text-shadow: 1px 0px 0px var(--bg-color), -1px 0px 0px var(--bg-color), 0px 1px 0px var(--bg-color), 1px 1px 0px var(--bg-color), -1px 1px 0px var(--bg-color);
 }
 
@@ -146,6 +147,10 @@ body {
 
 .incorrect {
   color: var(--wrong-color);
+}
+
+.error {
+    border-bottom: 2px solid var(--wrong-color);
 }
 
 #wordsInput {

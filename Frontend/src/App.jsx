@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import TypingBox from './components/TypingBox'
+import DTypingBox from './components/DTypingBox'
 
 function App() {
 
@@ -13,7 +14,8 @@ function App() {
       <div id="tempspace">
 
       </div>
-      <TypingBox></TypingBox>
+      {/* <TypingBox></TypingBox> */}
+      <DTypingBox></DTypingBox>
     </>
   )
 }

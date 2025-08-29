@@ -225,7 +225,7 @@ export default function TypingBox() {
         const value = e.target.value;
         const sourceWords = text.split(' ');
         const typedWords = input.split(' ');
-        
+
         if (!finished && typedWords.length === sourceWords.length && value === input + " ") {
             stopTimer();
             setFinished(true);
