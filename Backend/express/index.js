@@ -1,20 +1,35 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
+import express from "express";
+import cors from "cors";
+import axios from "axios";
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
-app.post("/api/generate", async (req, res) => {
+app.use(cors({
+    origin: "http://localhost:5173", 
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+}));
+
+app.post("/generate", async (req, res) => {
+    const { letters, words, length } = req.body;
+    console.log("Wrong letters:", letters);
+    console.log("Wrong words:", words);
+    console.log("length:", length);
+
     try {
-        const response = await axios.post("http://localhost:5000/generate", req.body);
+        const response = await axios.post("http://127.0.0.1:8000/generate", { 
+            letters,
+            words,
+            length
+        });
         res.json(response.data);
     } catch (err) {
         console.error(err.message);
-        res.status(500).json({ error: "AI generation failed" });
+        res.status(500).json({ error: "FastAPI server not responding" });
     }
 });
 
-const PORT = 4000;
-app.listen(PORT, () => console.log(`Express server running on port ${PORT}`));
+app.listen(5000, () => {
+  console.log("✅ Express server running on http://localhost:5000");
+});

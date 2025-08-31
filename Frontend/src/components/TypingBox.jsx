@@ -1,13 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "./TypingBox.css";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import axios from "axios";
 
-const sampleTexts = [
-    "The Industrial Revolution changed societies in Great Britain.",
-    "AI is rapidly evolving and impacting communication.",
-    "A hidden stream flows quietly under the moonlight.",
-    "The deep ocean holds a mysterious, diverse ecosystem."
-];
 const typingKeys = /^[a-zA-Z0-9 `~!@#$%^&*()_+\-=[\]{}|;:'",.<>/?\\]$/;
 
 export default function TypingBox() {
@@ -20,6 +15,8 @@ export default function TypingBox() {
     const [time, setTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const isGeneratingRef = useRef(false);
+
 
     const [correctLetters, setCorrectLetters] = useState({});
     const [wrongLetters, setWrongLetters] = useState({});
@@ -84,15 +81,51 @@ export default function TypingBox() {
         });
     }, [stopTimer, resetTimer]);
     
-    const generateNewText = useCallback(() => {
-        let newText;
-        do {
-            newText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
-        } while (newText === text);
-        setText(newText);
-        resetTyping()
-    }, [text, resetTyping]);
+    const generateNewText = async () => {
+        if (isGeneratingRef.current) return;
+        isGeneratingRef.current = true;
 
+        let saved = JSON.parse(localStorage.getItem("typingStats_temp")) || { wrongLetters: {}, wrongWords: {} };
+        let sortedLetters = Object.entries(saved.wrongLetters || {})
+        .sort((a, b) => b[1] - a[1]) 
+        .map(([letter]) => letter);
+
+        let sortedWords = Object.entries(saved.wrongWords || {})
+            .sort((a, b) => b[1] - a[1])
+            .map(([word]) => word);
+
+        let topLetters = sortedLetters.slice(0, 10);
+        let topWords = sortedWords.slice(0, 10);
+
+            function pickRandomFive(arr) {
+            let shuffled = arr.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, Math.min(5, arr.length));
+        }
+
+        let letters = pickRandomFive(topLetters);
+        let words = pickRandomFive(topWords);
+
+        console.log("Selected letters:", letters);
+        console.log("Selected words:", words);
+
+
+        try {
+            // const quoteResponse = await axios.post("http://localhost:5000/quote", {length: 20});
+            // setText(quoteResponse.data.text)
+            
+            const payload = { letters, words, length: 20 };
+            const response = await axios.post("http://localhost:5000/generate", payload);
+            const newText = response.data.text;
+            console.log(newText);
+            setText(newText)
+            resetTyping();  
+        } catch (error) {
+            console.error("Error fetching new text:", error);
+        } finally {
+            isGeneratingRef.current = false; 
+        }
+    };
+    
     const handleNewText = () => {
         generateNewText();
         inputRef.current?.focus();
@@ -238,10 +271,11 @@ export default function TypingBox() {
     useEffect(() => {
         const savedData = JSON.parse(localStorage.getItem('typingStats_temp') || '{}');
         setCorrectLetters(savedData.correctLetters || {});
-        setWrongLetters(savedData.wrongLetters || {});
         setCorrectWords(savedData.correctWords || {});
+        setWrongLetters(savedData.wrongLetters || {});
         setWrongWords(savedData.wrongWords || {});
         console.log(savedData)
+        generateNewText()
     }, []);
 
     useEffect(() => {
@@ -250,10 +284,6 @@ export default function TypingBox() {
              localStorage.setItem('typingStats_temp', JSON.stringify(stats));
         }
     }, [correctLetters, wrongLetters, correctWords, wrongWords]);
-
-    useEffect(() => {
-        generateNewText()
-    }, [])
 
     useEffect(() => {
         const cursorNode = cursorRef.current;

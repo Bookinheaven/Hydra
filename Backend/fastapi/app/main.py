@@ -1,17 +1,16 @@
+import threading
 import logging
 import os
-import sys
+import random
 from fastapi import FastAPI
 from pydantic import BaseModel
 from gpt4all import GPT4All
 from fastapi.middleware.cors import CORSMiddleware
 
-# --- CONFIGURATION ---
-MODEL_FOLDER = "models"  # Define your custom folder name
+MODEL_FOLDER = "models"
 MODEL_FILENAME = "Phi-3-mini-4k-instruct.Q4_0.gguf"
 logging.basicConfig(level=logging.INFO)
 
-# --- APP SETUP ---
 app = FastAPI(title="Typing AI Backend")
 app.add_middleware(
     CORSMiddleware,
@@ -20,7 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model = None  
+model = None
+model_lock = threading.Lock()
+
 try:
     script_dir = os.path.dirname(os.path.abspath(__file__))
     model_directory = os.path.join(script_dir, MODEL_FOLDER)
@@ -31,33 +32,52 @@ try:
     model = GPT4All(
         MODEL_FILENAME,
         model_path=model_directory,
-        device='gpu'
+        device="gpu"
     )
     logging.info("✅ Model loaded successfully.")
 except Exception as e:
     logging.error(f"FATAL: Could not load or download model. Error: {e}")
 
-class AIRequest(BaseModel):
-    letters: list[str]
-    words: list[str]
+class GenerateRequest(BaseModel):
+    letters: list[str] = []
+    words: list[str] = []
+    length: int = 20
 
-@app.post("/generate")
-def generate_sentence(request: AIRequest):
+RANDOM_LETTERS = list("abcdefghijklmnopqrstuvwxyz")
+RANDOM_WORDS = ["sky", "river", "cloud", "light", "dream", "spark", "flow"]
+
+@app.post("/generate") 
+def generate(request: GenerateRequest):
     if model is None:
-        return {"text": "Error: Model is not available. Please check server logs."}
-    
-    letters = ", ".join(request.letters)
-    words = ", ".join(request.words)
-    
+        return {"text": "Error: The AI model is not loaded. Please check server logs."}
+
+    letters = request.letters or random.sample(RANDOM_LETTERS, k=5)
+    words = request.words or random.sample(RANDOM_WORDS, k=3)
+
     prompt = (
-        f"Generate a short, single typing sentence for a typing test that includes "
-        f"the letters: {letters} and the words: {words}. The sentence must be "
-        f"between 10 and 15 words long. Only output the sentence itself."
+        f"Write a plain sentence for a typing test. "
+        f"It must contain these letters: {', '.join(letters)} "
+        f"and these words: {', '.join(words)}. "
+        f"The sentence should be about {request.length} words long. "
+        f"Do not explain, do not add extra text, only return the sentence."
     )
-    logging.info(f"Generating with prompt: '{prompt}'")
-    
-    with model.chat_session():
-        response = model.generate(prompt, max_tokens=100)
-    
-    logging.info(f"Generated response: {response.strip()}")
-    return {"text": response.strip()}
+
+    logging.info(f"Generating with prompt...") 
+
+    try:
+        with model_lock:
+            logging.info("Lock acquired, generating response...")
+            with model.chat_session():
+                response = model.generate(
+                    prompt,
+                    max_tokens=200,
+                    temp=0.7,
+                )
+        
+        clean_response = response.strip().split("\n")[0]
+        logging.info(f"Generated response: {clean_response}")
+        return {"text": clean_response} 
+
+    except Exception as e:
+        logging.error(f"An error occurred during model generation: {e}")
+        return {"text": "The quick brown fox jumps over the lazy dog."}
