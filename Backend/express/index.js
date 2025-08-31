@@ -1,6 +1,6 @@
-import express from "express";
-import cors from "cors";
-import axios from "axios";
+const express = require("express");
+const cors = require("cors");
+const axios = require("axios");
 
 const app = express();
 app.use(express.json());
@@ -13,12 +13,8 @@ app.use(cors({
 
 app.post("/generate", async (req, res) => {
     const { letters, words, length } = req.body;
-    console.log("Wrong letters:", letters);
-    console.log("Wrong words:", words);
-    console.log("length:", length);
-
     try {
-        const response = await axios.post("http://127.0.0.1:8000/generate", { 
+        const response = await axios.post("http://127.0.0.1:8000/api/generate/", { 
             letters,
             words,
             length
@@ -31,5 +27,5 @@ app.post("/generate", async (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log("✅ Express server running on http://localhost:5000");
+  console.log("Express server running on http://localhost:5000");
 });
