@@ -1,4 +1,18 @@
 :root {
+  --bg-color: #242933;
+  --main-color: #ec4c56;
+  --cursor-color : #ec4c56;
+  --sub-color: #596172;
+  --sub-alt-color: #1c222d;
+  --text-color: #f6f0e9;
+  --custom-border-radius : 0.5rem;
+  --cursor-height : 1.1em;
+  --default-color: grey;
+  --correct-color: white;
+  --wrong-color: #ef4444;
+  --focus-warn-color: #ffffff;
+  --untyped-letter-color: #596172;
+  --button-hover-color: #ffffff67;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;

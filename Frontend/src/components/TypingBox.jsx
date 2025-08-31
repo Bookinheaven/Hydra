@@ -105,18 +105,12 @@ export default function TypingBox() {
         let letters = pickRandomFive(topLetters);
         let words = pickRandomFive(topWords);
 
-        console.log("Selected letters:", letters);
-        console.log("Selected words:", words);
-
-
         try {
             // const quoteResponse = await axios.post("http://localhost:5000/quote", {length: 20});
             // setText(quoteResponse.data.text)
-            
             const payload = { letters, words, length: 20 };
             const response = await axios.post("http://localhost:5000/generate", payload);
             const newText = response.data.text;
-            console.log(newText);
             setText(newText)
             resetTyping();  
         } catch (error) {
@@ -274,7 +268,6 @@ export default function TypingBox() {
         setCorrectWords(savedData.correctWords || {});
         setWrongLetters(savedData.wrongLetters || {});
         setWrongWords(savedData.wrongWords || {});
-        console.log(savedData)
         generateNewText()
     }, []);
 
@@ -382,7 +375,6 @@ export default function TypingBox() {
                         <svg xmlns="http://www.w3.org/2000/svg" width="2em" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" ><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
                     <ReactTooltip id="next-button-tooltip" place="bottom" />
-
                 </div>
             </div>
         </div>

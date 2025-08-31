@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import TypingBox from './components/TypingBox'
+import TopBar from './components/TopBar'
 
 function App() {
 
@@ -10,8 +11,8 @@ function App() {
         <h1>Hydra</h1>
       </div>
       {/* Need to add access bar here */}
+      <TopBar></TopBar>
       <div id="tempspace">
-
       </div>
       <TypingBox></TypingBox>
     </>
