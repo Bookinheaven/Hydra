@@ -5,7 +5,7 @@ import axios from "axios";
 
 const typingKeys = /^[a-zA-Z0-9 `~!@#$%^&*()_+\-=[\]{}|;:'",.<>/?\\]$/;
 
-export default function TypingBox() {
+export default function TypingBox({ currentMode, setCurrentMode }) {
     const [text, setText] = useState("");
     const [input, setInput] = useState("");
     const [onFocus, setOnFocus] = useState(true);

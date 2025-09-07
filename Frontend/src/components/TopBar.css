@@ -9,23 +9,49 @@
     display: flex;
     background-color: var(--sub-alt-color);
     border-radius: var(--custom-border-radius);
+    box-shadow: 1px 2px 60px var(--box-shadow-group);
+}
+
+.selected {
+    color: var(--main-color) !important;
+   
 }
 
 #topbar button {
     background-color: transparent;
+    color: var(--light-text-color);
     border: none;
     outline: none;
+    padding: 0.6rem;
     transition: color .2s ease-in;
-
-
 }
 
 #topbar button:hover {
-    color: var(--main-color)
+    color: var(--text-color)
 }
 
-button:focus,
-button:focus-visible {
+#topbar button:hover svg path {
+    fill: var(--text-color);
 
 }
 
+#topbar button svg {
+    align-self: flex-end;
+    width:0.8em;
+}
+
+#topbar button svg path {
+    transition: fill .2s ease-in; 
+    fill: var(--light-text-color);
+}
+
+
+#topbar button span {
+    display: flex;
+    gap: 0.3rem;
+}
+
+#topbar-sub-group {
+    display: flex;
+    align-items: center;
+}
