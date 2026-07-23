@@ -1,26 +1,37 @@
 # Logs
-logs
+logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Node
+node_modules/
+dist/
+dist-ssr/
 
-# Editor directories and files
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
+
+# OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-/Backend/fastapi/app/models
-*.pyc
+Thumbs.db
+
+# Testing
+coverage/
+.pytest_cache/
+.mypy_cache/
+
+# Build
+build/
