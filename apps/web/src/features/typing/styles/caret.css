@@ -1,0 +1,31 @@
+@keyframes blink {
+
+    0%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:0;
+    }
+
+    100%{
+        opacity:1;
+    }
+
+}
+
+.hydra-caret{
+
+    display:inline-block;
+
+    width:2px;
+
+    height:1.4em;
+
+    background:#00d4ff;
+
+    vertical-align:text-bottom;
+
+    animation:blink 1s infinite;
+
+}

@@ -1,9 +1,16 @@
+import TypingArea from "./components/TypingArea";
+import useTypingEngine from "./hooks/useTypingEngine";
+
 const TypingPage = () => {
-  return (
-    <div>
-      <h1>Hydra</h1>
-    </div>
-  );
+
+    const engine = useTypingEngine();
+
+    return (
+        <TypingArea
+            state={engine.state}
+            dispatch={engine.dispatch}
+        />
+    );
 };
 
 export default TypingPage;

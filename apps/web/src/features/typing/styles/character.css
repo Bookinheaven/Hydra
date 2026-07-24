@@ -1,0 +1,23 @@
+.hydra-character {
+    transition: color 120ms ease;
+}
+
+.hydra-character--untyped {
+    color: #777;
+}
+
+.hydra-character--correct {
+    color: #ffffff;
+}
+
+.hydra-character--incorrect {
+    color: #ff5c5c;
+}
+
+.hydra-character--extra {
+    color: #ff9800;
+}
+
+.hydra-character--skipped {
+    color: #ffd54f;
+}
