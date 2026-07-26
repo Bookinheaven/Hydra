@@ -1,9 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-color: #323437;
+  --panel-color: #2c2e31;
+  --border-color: #3b3d41;
+  --text-color: #646669;
+  --main-color: #e2b714;
+  --sub-color: #d1d0c5;
+  --error-color: #ca4754;
+}
+
 @layer base {
   body {
-    @apply bg-zinc-950 text-zinc-300 font-sans antialiased;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
+
+  code, kbd, samp, pre, .font-mono {
+    font-family: 'Roboto Mono', 'JetBrains Mono', monospace !important;
+  }
+
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Caret blink */
+@keyframes smooth-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-caret {
+  animation: smooth-blink 1s infinite ease-in-out;
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
 }

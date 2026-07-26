@@ -3,10 +3,8 @@ import { Character } from './Character.jsx';
 import { CharacterStates } from '../constants/CharacterStates.js';
 
 export const Word = memo(function Word({ word, characterStates, extraChars, isCurrent, currentCharIndex }) {
-  // If word is current or has errors, it might need a visual indicator (like underline for error in strict mode), but we'll keep it simple for now.
-  
   return (
-    <div className="inline-block relative whitespace-nowrap mb-2 mr-3 text-2xl font-mono">
+    <div className="word-wrapper inline-block whitespace-nowrap mb-1.5 mr-3 text-2xl font-mono tracking-normal leading-[48px]">
       {word.characters.map((charObj) => {
         const state = characterStates[charObj.globalIndex] || CharacterStates.UNTYPED;
         const id = `char-${word.index}-${charObj.index}`;
@@ -37,8 +35,6 @@ export const Word = memo(function Word({ word, characterStates, extraChars, isCu
   if (prev.currentCharIndex !== next.currentCharIndex) return false;
   if (prev.extraChars !== next.extraChars) return false;
   
-  // Shallow compare character states for this word's range. 
-  // O(N) where N is word length, still O(1) in the context of the whole passage.
   for (let i = prev.word.startIndex; i <= prev.word.endIndex; i++) {
     if (prev.characterStates[i] !== next.characterStates[i]) {
       return false;

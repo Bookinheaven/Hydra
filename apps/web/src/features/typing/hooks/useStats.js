@@ -1,27 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { StatisticsService } from '../services/StatisticsService.js';
 import { SessionStatus } from '../models/Session.js';
 
 export function useStats(session, passage) {
-  const [stats, setStats] = useState({ wpm: 0, rawWpm: 0, accuracy: 0, cpm: 0 });
+  const [ticker, setTicker] = useState(0);
 
+  // Tick every 500ms during TYPING so time elapsed and WPM update smoothly
   useEffect(() => {
-    if (session.status === SessionStatus.IDLE) {
-      setStats({ wpm: 0, rawWpm: 0, accuracy: 0, cpm: 0 });
-      return;
-    }
-
-    if (session.status === SessionStatus.COMPLETED) {
-      setStats(StatisticsService.calculateStats(session, passage));
-      return;
-    }
-
+    if (session.status !== SessionStatus.TYPING) return;
     const interval = setInterval(() => {
-      setStats(StatisticsService.calculateStats(session, passage));
-    }, 1000); // Update stats every second
-
+      setTicker(t => t + 1);
+    }, 500);
     return () => clearInterval(interval);
-  }, [session, passage]);
+  }, [session.status]);
 
-  return stats;
+  return useMemo(() => {
+    if (session.status === SessionStatus.IDLE) {
+      return { wpm: 0, rawWpm: 0, accuracy: 100, cpm: 0 };
+    }
+    return StatisticsService.calculateStats(session, passage);
+  }, [session, passage, ticker]);
 }

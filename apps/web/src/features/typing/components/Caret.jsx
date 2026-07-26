@@ -5,10 +5,12 @@ export const Caret = ({ top, left, isVisible }) => {
 
   return (
     <div
-      className="absolute bg-teal-400 w-1 h-8 rounded-full transition-all duration-75 ease-out animate-pulse"
+      className="absolute w-[2.5px] rounded-full bg-[var(--main-color)] animate-caret z-10"
       style={{
         top: `${top}px`,
         left: `${left}px`,
+        height: '28px',
+        transition: 'top 0.08s ease-out, left 0.08s ease-out',
       }}
     />
   );

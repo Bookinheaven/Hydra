@@ -3,12 +3,17 @@ import { engineReducer, EngineActionTypes } from '../reducer/engineReducer.js';
 import { createInitialSession } from '../models/Session.js';
 import { Passage } from '../models/Passage.js';
 
-export function useEngine(initialText) {
+export function useEngine(initialText, enabled = true) {
   const [session, dispatch] = useReducer(engineReducer, null, createInitialSession);
   
   const passage = useMemo(() => new Passage(initialText), [initialText]);
 
   const handleKeyDown = useCallback((e) => {
+    if (!enabled || !e || typeof e.key !== 'string') return;
+    const target = e.target;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+      return;
+    }
     dispatch({
       type: EngineActionTypes.KEYDOWN,
       payload: {
@@ -19,7 +24,7 @@ export function useEngine(initialText) {
         passage,
       },
     });
-  }, [passage]);
+  }, [passage, enabled]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -32,9 +37,14 @@ export function useEngine(initialText) {
     dispatch({ type: EngineActionTypes.RESET });
   }, []);
 
+  const endSession = useCallback(() => {
+    dispatch({ type: EngineActionTypes.END_SESSION });
+  }, []);
+
   return {
     session,
     passage,
     reset,
+    endSession,
   };
 }

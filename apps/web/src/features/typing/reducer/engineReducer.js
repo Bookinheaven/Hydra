@@ -1,10 +1,11 @@
 import { InputType, InputService } from '../services/InputService.js';
 import { TypingService } from '../services/TypingService.js';
-import { createInitialSession } from '../models/Session.js';
+import { createInitialSession, SessionStatus } from '../models/Session.js';
 
 export const EngineActionTypes = {
   KEYDOWN: 'KEYDOWN',
   RESET: 'RESET',
+  END_SESSION: 'END_SESSION',
 };
 
 export function engineReducer(state, action) {
@@ -12,7 +13,19 @@ export function engineReducer(state, action) {
     return createInitialSession();
   }
 
+  if (action.type === EngineActionTypes.END_SESSION) {
+    if (state.status !== SessionStatus.COMPLETED) {
+      return {
+        ...state,
+        status: SessionStatus.COMPLETED,
+        endTime: Date.now(),
+      };
+    }
+    return state;
+  }
+
   if (action.type === EngineActionTypes.KEYDOWN) {
+    if (!action.payload) return state;
     const { key, ctrlKey, metaKey, altKey, passage } = action.payload;
     const inputType = InputService.classify(key, ctrlKey, metaKey, altKey);
 

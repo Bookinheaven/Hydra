@@ -1,12 +1,14 @@
 import { CharacterStates } from '../constants/CharacterStates.js';
 import { ValidationService } from './ValidationService.js';
 import { SessionStatus } from '../models/Session.js';
+import { SoundService } from './SoundService.js';
 
 export const TypingService = {
   handleChar(session, passage, char) {
     if (session.status === SessionStatus.COMPLETED) return session;
 
     const currentWord = passage.words[session.currentWordIndex];
+    if (!currentWord) return session;
     const expectedChar = currentWord.characters[session.currentCharIndex]?.expected;
     
     const state = ValidationService.validateChar(expectedChar, char);
@@ -19,6 +21,7 @@ export const TypingService = {
     }
 
     if (state === CharacterStates.EXTRA) {
+      SoundService.playError();
       const extraArr = newSession.extraCharacters[session.currentWordIndex] || [];
       newSession.extraCharacters = {
         ...newSession.extraCharacters,
@@ -32,7 +35,10 @@ export const TypingService = {
         [globalIndex]: state,
       };
       if (state === CharacterStates.INCORRECT) {
+        SoundService.playError();
         newSession.mistakes++;
+      } else {
+        SoundService.playClick();
       }
       newSession.currentCharIndex++;
     }
@@ -44,7 +50,10 @@ export const TypingService = {
     if (session.status === SessionStatus.COMPLETED) return session;
 
     const currentWord = passage.words[session.currentWordIndex];
+    if (!currentWord) return session;
     
+    SoundService.playClick();
+
     // Mark remaining chars as skipped
     const newCharacterStates = { ...session.characterStates };
     for (let i = session.currentCharIndex; i < currentWord.characters.length; i++) {
@@ -72,6 +81,7 @@ export const TypingService = {
     if (session.status === SessionStatus.IDLE) return session;
     if (session.status === SessionStatus.COMPLETED) return session;
 
+    SoundService.playClick();
     const newSession = { ...session };
 
     if (session.currentCharIndex > 0) {
